@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -130,7 +131,61 @@ public class BulkFileRenamer {
 		txtFind = new JTextField("", 15);
 		txtReplace = new JTextField("", 15);
 		btnFind = new JButton("Find");
+		btnFind.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String folder = txtBrowseFolder.getText();
+				if( folder != null && folder.trim().length() > 0) {
+					String findText = txtFind.getText();
+					if( findText != null && findText.trim().length() > 0) {
+						String str = findFiles(folder, findText);
+						txtResult.setText(str);
+						btnReplace.setEnabled(true);
+					} else {
+						SwingUtils.showMessage("Enter Find text");
+					}
+				} else {
+					SwingUtils.showMessage("Select a folder");
+				}
+			}
+			
+		});
 		btnReplace = new JButton("Replace");
+		btnReplace.setEnabled(false);
+		btnReplace.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String txt = txtResult.getText();
+				StringBuilder sb = new StringBuilder();
+				if( txt != null && txt.length() > 0) {
+					String[] lst = txt.split("\n");
+					if( lst != null && lst.length > 0) {
+						File f = null;
+						File f2 = null;
+						String fnd = txtFind.getText();
+						String rep = txtReplace.getText();
+						String nm = null;
+						String full = null;
+						for(String s : lst) {
+							f = new File(s);
+							full = f.getAbsolutePath();
+							nm = f.getName();
+							full = full.replace(nm, "");
+							if(nm.contains(fnd)) {
+								nm = nm.replace(fnd, rep);
+								f2 = new File(full + nm);
+								f.renameTo(f2);
+								sb.append(f.getAbsolutePath()).append("\n");
+							}
+						}
+						txtResult.setText("Done");
+					}
+				}
+			}
+			
+		});
 		
 		JPanel hPanel2 = new JPanel();
 		hPanel2.setLayout(new FlowLayout(FlowLayout.LEADING));
@@ -149,6 +204,24 @@ public class BulkFileRenamer {
 		
 		pnlHeader.add(hPanel);
 		return pnlHeader;
+	}
+	
+	private String findFiles(String folder, String findText) {
+		StringBuilder sb = new StringBuilder();
+		File f = new File(folder);
+		File[] files = f.listFiles();
+		if( files != null && files.length > 0) {
+			String fName;
+			for(File f2 : files) {
+				fName = f2.getName();
+				if(fName.contains(findText)) {
+					sb.append(f2.getAbsolutePath()).append("\n");
+				}
+			} 
+		} else {
+			sb.append("No files in the folder");
+		}
+		return sb.toString();
 	}
 	
 	public JComponent getCenterPanel() {

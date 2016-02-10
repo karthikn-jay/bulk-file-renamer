@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
 public class SwingUtils {
 	
 	public static void showMessage(String message) {
-		showMessage(message, "Message");
+		showMessage(message, Constants.APP_TITLE);
 	}
 	
 	public static void showMessage(String message, String title) {
